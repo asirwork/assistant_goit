@@ -1,4 +1,5 @@
 from datetime import datetime
+from abc import ABC, abstractmethod
 
 from personal_assistant.notebook import NOTE_BOOK, Text, Keyword, RecordNote
 from personal_assistant.adressbook import ADRESS_BOOK, Record, Name, Phone
@@ -57,12 +58,39 @@ def print_header_note():
 # def print_notes(note_record, note_tag, note_text):
     # print('|{:^15}|{:^20}|{:^30}|'.format(note_record, note_tag, note_text))
 
-def show_notes():
-    # print_header_note()
-    data = NOTE_BOOK.show_all_notes()
-    # note_data = data.split('\n')
-    # print_notes(note_data[0], note_data[2], note_data[1])
-    return data
+# Використання абстрактного базового класу
+
+class UserInterface(ABC):
+    @abstractmethod
+    def show_all_contacts(self):
+        pass
+
+    @abstractmethod
+    def show_notes(self):
+        pass
+
+class Console(UserInterface):
+    def show_all_contacts(self):
+        if ADRESS_BOOK.values():
+            print_header_contact()
+            for record in ADRESS_BOOK.values():
+                show_contact(record)
+        else:
+            print('\nЯ поки що не знаю ніяких контактів.')
+
+    def show_notes(self):
+        data = NOTE_BOOK.show_all_notes()
+        return data
+    
+console_view = Console()
+
+# заміни на код який зверху:
+# def show_notes():
+#     # print_header_note()
+#     data = NOTE_BOOK.show_all_notes()
+#     # note_data = data.split('\n')
+#     # print_notes(note_data[0], note_data[2], note_data[1])
+#     return data
 
 def edit_note(notebook: NOTE_BOOK, note_name: str, new_text: str) -> str:
     for key, record in notebook.data.items():
@@ -108,7 +136,8 @@ def note_book():
             case 'search':
                 print(search_note())
             case 'show':
-                print(show_notes())
+                # print(show_notes())
+                print(console_view.show_notes())
             case 'menu':
                 NOTE_BOOK.save_to_notebin()
                 main()
@@ -160,13 +189,15 @@ def delete_contact_record():
             return ADRESS_BOOK.del_record(record)
     return f'Контакту з іменем {name} не знайдено.'
 
-def show_all_contacts():
-    if ADRESS_BOOK.values():
-        print_header_contact()
-        for record in ADRESS_BOOK.values():
-            show_contact(record)
-    else:
-        print('\nЯ поки що не знаю ніяких контактів.')
+
+# заміни на код який зверху, починається з 63 рядка:
+# def show_all_contacts():
+#     if ADRESS_BOOK.values():
+#         print_header_contact()
+#         for record in ADRESS_BOOK.values():
+#             show_contact(record)
+#     else:
+#         print('\nЯ поки що не знаю ніяких контактів.')
 
 @input_error
 def add_contact_info(name):
@@ -281,7 +312,8 @@ def adress_book():
             case 'search':
                 search_contact()
             case 'show':
-                show_all_contacts()
+                # show_all_contacts()
+                console_view.show_all_contacts()
             case 'menu':
                 ADRESS_BOOK.save_to_bin()
                 main()
